@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Resolve the real path of this script (following symlinks)
+SELF="$(readlink -f "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "$SELF")"
+
+# Temp script
+SCRIPT="/tmp/_run_in_terminal_$RANDOM.sh"
+
+# Copy source file except the first line to script
+tail -n +2 "$1" > "$SCRIPT"
+
+# Make it executable
+chmod a+x "$SCRIPT"
+
+# Check if in terminal
+if [[ ! -t 1 ]]; then
+
+    # Run in new terminal
+    "$SCRIPT_DIR/terminal.sh" "$SCRIPT"
+
+# Terminal
+else
+
+    # Run in current terminal
+    "$SCRIPT"
+
+fi
+
+# Remove temp script
+rm "$SCRIPT"
