@@ -1,20 +1,27 @@
 #!/bin/sh
 #
-# lgrep — log-aware grep for logs with continuation lines
-# A record starts with a non-space / non-tab character
-# Continuation lines start with space or tab
+# lgrep — log-aware grep: matches whole multi-line records (first line is flush-left,
+# continuation lines are indented) that contain PATTERN anywhere in the record.
+# Case-insensitive. Reads from FILE(s) or stdin if no file is given.
 #
 # Usage:
-#   lgrep PATTERN FILE...
+#   lgrep PATTERN [FILE...]
+#   cat FILE | lgrep PATTERN
 #
 
-if [ $# -lt 2 ]; then
-    echo "Usage: $0 PATTERN FILE..." >&2
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 PATTERN [FILE...]" >&2
     exit 1
 fi
 
 pat=$1
 shift
+
+# If no files given and stdin is not a terminal, read from stdin
+if [ $# -eq 0 ] && [ -t 0 ]; then
+    echo "Usage: $0 PATTERN [FILE...]" >&2
+    exit 1
+fi
 
 awk -v pat="$pat" '
 BEGIN {
