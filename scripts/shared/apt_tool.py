@@ -112,6 +112,23 @@ def load_and_compare_package_lists(master_file, slave_file):
 
     return result
 
+def detect_codename():
+    try:
+        result = subprocess.run(['lsb_release', '-cs'], capture_output=True, text=True)
+        name = result.stdout.strip()
+        if name:
+            return name
+    except FileNotFoundError:
+        pass
+    try:
+        with open('/etc/os-release') as f:
+            for line in f:
+                if line.startswith('VERSION_CODENAME='):
+                    return line.split('=', 1)[1].strip().strip('"')
+    except OSError:
+        pass
+    return None
+
 def bookmark_to_file(bookmark_file):
 
     apt_command = 'apt list --installed > ' + bookmark_file
@@ -127,7 +144,7 @@ if __name__ == "__main__":
 
     # Subparser for local_fix
     parser_local_fix = subparsers.add_parser('local_fix', help='Reinstall locally installed packages from the repository')
-    parser_local_fix.add_argument('--code-name', type=str, default='noble', help='Code name for the repository')
+    parser_local_fix.add_argument('--code-name', type=str, default=None, help='Code name for the repository (default: auto-detected)')
 
     # Subparser for local_delete
     parser_local_fix = subparsers.add_parser('local_delete', help='Delete locally installed packages from the repository')
@@ -152,7 +169,11 @@ if __name__ == "__main__":
 
     if args.action == "local_fix":
 
-        code_name = args.code_name
+        code_name = args.code_name or detect_codename()
+        if not code_name:
+            print("Error: could not detect OS codename. Pass --code-name explicitly.")
+            exit(1)
+        print(f"Using codename: {code_name}")
 
         # Command
         apt_command = 'apt list --installed | grep "local]"'
