@@ -16,5 +16,5 @@ if [[ "${MOUNT:-}" == true ]]; then
     fusermount3 -u "$HOME/media" 2>/dev/null || true
 
     # Mount
-    sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,noatime $USER@192.168.0.5:/media "$HOME/media"
+    sshfs -o reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,noatime $USER@myklos.org:/media "$HOME/media"
 fi

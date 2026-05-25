@@ -7,7 +7,7 @@ MOUNT_DIR=~/tmp
 BACKUP_DIR=$MOUNT_DIR/Image
 SSHFS="jakub@myklos.org:/media"
 DEVICE=""
-EXCLUDE=--exclude="/home/jakub/Android/android-sdk-linux/system-images"
+EXCLUDE=--exclude="/home/$USER/Android/android-sdk-linux/system-images"
 
 set -e
 
