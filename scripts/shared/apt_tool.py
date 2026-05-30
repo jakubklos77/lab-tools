@@ -88,14 +88,15 @@ def load_package_list_dict(filename, condition=""):
 def compare_package_list(masters, slaves):
     result = {}
 
-    # For each slave
     for slave in slaves:
+        if slave not in masters:
+            result[slave] = 'remove'
+        elif masters[slave] != slaves[slave]:
+            result[slave] = 'mark_' + masters[slave]  # 'mark_auto' or 'mark_manual'
 
-        # Check if slave not exists in master and print
-        if not (slave in masters):
-            result[slave] = slaves[slave]
-        elif masters[slave] == 'auto' and slaves[slave] == 'manual':
-            result[slave] = 'auto'
+    for master in masters:
+        if master not in slaves:
+            result[master] = 'install'
 
     return result
 
@@ -291,22 +292,28 @@ if __name__ == "__main__":
         # Compare
         result = load_and_compare_package_lists(master_file, slave_file)
 
-        # Packages to remove and mark auto
-        remove_packages = ""
-        auto_packages = ""
+        remove_packages = []
+        install_packages = []
+        auto_packages = []
+        manual_packages = []
         for key, value in result.items():
-            if value == 'auto':
-                auto_packages += key + " "
-            else:
-                remove_packages += key + " "
+            if value == 'remove':
+                remove_packages.append(key)
+            elif value == 'install':
+                install_packages.append(key)
+            elif value == 'mark_auto':
+                auto_packages.append(key)
+            elif value == 'mark_manual':
+                manual_packages.append(key)
 
-        # Remove packages
         if remove_packages:
-            execute_command("apt remove " + remove_packages)
-
-        # Mark packages as auto
+            execute_command("apt remove " + " ".join(remove_packages))
+        if install_packages:
+            execute_command("apt install " + " ".join(install_packages))
         if auto_packages:
-            execute_command("apt-mark auto " + auto_packages)
+            execute_command("apt-mark auto " + " ".join(auto_packages))
+        if manual_packages:
+            execute_command("apt-mark manual " + " ".join(manual_packages))
 
         # Remove slave_file
         os.remove(slave_file)
