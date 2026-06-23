@@ -61,3 +61,6 @@ else
     ln -sf "$HOME/app/fabric/fabric" "$HOME/bin/fabric"
     echo "Created ~/bin/fabric symlink"
 fi
+
+# readme
+cat "$REPO_DIR/README.md"

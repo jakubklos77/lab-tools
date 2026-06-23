@@ -13,6 +13,10 @@ if [[ $? -eq 0 && -n "$result" ]]; then
   fi
 
   if [[ -n "$command" ]]; then
-    echo -n "$command" | wl-copy
+    if [ -n "$SSH_CONNECTION" ]; then
+      printf "\033]52;c;%s\a" "$(echo -n "$command" | base64 -w 0)"
+    else
+      echo -n "$command" | wl-copy
+    fi
   fi
 fi
