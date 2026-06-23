@@ -6,7 +6,7 @@ result=$(echo "$input" | "$HOME/app/fabric/fabric" -sp terminal_assistant)
 if [[ $? -eq 0 && -n "$result" ]]; then
   echo "$result"
 
-  command=$(echo "$result" | sed -n '/```bash/,/```/p' | sed '1d;$d' | sed '/^[[:space:]]*$/d')
+  command=$(echo "$result" | awk '/^```bash$/{found=1; next} found && /^```/{exit} found{print}' | sed '/^[[:space:]]*$/d')
 
   if [[ -z "$command" ]]; then
     command=$(echo "$result" | grep -v '^$' | tail -n 1)

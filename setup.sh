@@ -37,8 +37,8 @@ for f in "$REPO_DIR/bin/"*; do
 done
 echo "Created ~/bin symlinks for bin/*"
 
-# Copy repo .config to ~/.config (overwrite)
-cp -rf "$REPO_DIR/.config/." "$HOME/.config/"
+# Copy repo .config to ~/.config (no overwrite)
+cp --recursive --update=none "$REPO_DIR/.config/." "$HOME/.config/"
 echo "Copied .config to ~/.config"
 
 # install fabric
