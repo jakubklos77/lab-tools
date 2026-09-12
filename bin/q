@@ -1,17 +1,33 @@
 #!/usr/bin/env bash
 
-input="$*"
-result=$(echo "$input" | "$HOME/app/fabric/fabric" -sp terminal_assistant)
+# Argument parsing for options before positional parameters
+args=()
+while [[ $# -gt 0 && "$1" == -* ]]; do
+  if [[ "$1" == "--" ]]; then
+    shift
+    break
+  fi
+  args+=("$1")
+  shift
+done
 
+# Capture the input and pass it to the fabric command with the parsed options
+input="$*"
+result=$(echo "$input" | "$HOME/app/fabric/fabric" "${args[@]}" -sp terminal_assistant)
+
+# Check if the fabric command was successful and if there is any result
 if [[ $? -eq 0 && -n "$result" ]]; then
   echo "$result"
 
+  # Extract the bash command from the result, ignoring empty lines
   command=$(echo "$result" | awk '/^```bash$/{found=1; next} found && /^```/{exit} found{print}' | sed '/^[[:space:]]*$/d')
 
+  # If no bash command was found, fall back to the last non-empty line of the result
   if [[ -z "$command" ]]; then
     command=$(echo "$result" | grep -v '^$' | tail -n 1)
   fi
 
+  # Copy the extracted command to the clipboard or SSH connection if available
   if [[ -n "$command" ]]; then
     if [ -n "$SSH_CONNECTION" ]; then
       printf "\033]52;c;%s\a" "$(echo -n "$command" | base64 -w 0)"
