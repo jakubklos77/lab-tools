@@ -7,7 +7,12 @@ MOUNT_DIR=~/tmp
 BACKUP_DIR=$MOUNT_DIR/Image
 SSHFS="jakub@myklos.org:/media"
 DEVICE=""
-EXCLUDE=--exclude="/home/$USER/Android/android-sdk-linux/system-images"
+REAL_USER=${SUDO_USER:-$USER} # the script re-runs itself via sudo, where $USER is root
+EXCLUDE=(
+  --exclude="/home/$REAL_USER/Android/android-sdk-linux/system-images"
+  --exclude="/home/$REAL_USER/.cache"
+  --exclude="/tmp"
+)
 
 set -e
 
@@ -47,4 +52,4 @@ read -n 1 -p "Press any key to continue"
 find $BACKUP -type f -mtime +$DAYS -delete
 
 # Archive
-fsarchiver savefs $EXCLUDE -v -A $IMAGE $DEVICE
+fsarchiver savefs "${EXCLUDE[@]}" -v -A $IMAGE $DEVICE
